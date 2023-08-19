@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.newchromantics.poph264": {
+      "version": "https://github.com/NewChromantics/PopH264.UnityPackage.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "6ebc49b235299e891026d6f3b97a2d18b6402657"
+    },
     "com.unity.collab-proxy": {
       "version": "2.0.5",
       "depth": 0,
