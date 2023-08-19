@@ -7,4 +7,5 @@ Logs/
 
 *.sln
 *.csproj
-
+.idea/
+obj/
