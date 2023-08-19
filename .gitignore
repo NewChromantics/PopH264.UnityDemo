@@ -1,0 +1,10 @@
+# Unity user/build/working files
+
+Library/
+UserSettings/
+Temp/
+Logs/
+
+*.sln
+*.csproj
+
