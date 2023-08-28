@@ -11,3 +11,5 @@ Logs/
 obj/
 
 .vsconfig
+
+.vs/
