@@ -9,3 +9,5 @@ Logs/
 *.csproj
 .idea/
 obj/
+
+.vsconfig
