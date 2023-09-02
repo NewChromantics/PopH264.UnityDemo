@@ -10,13 +10,14 @@ public class DecodeDemo : MonoBehaviour
 	public UIDocument	Document;
 	public string		DecodePushLabelName = "DecodePushLabel";
 	public string		DecodePopLabelName = "DecodePopLabel";
+	public string		DecodeImageName = "DecodeImage";
 
 	PopH264.Decoder		Decoder;
 	public PopH264.DecoderParams	DecoderParams;
 	public string		TestDataName = "RainbowGradient.h264";
 	int FrameCounter = 0;
 	int FrameFrequency = 100;
-	int KeyFrameFrequency => FrameFrequency * 10;
+	int KeyFrameFrequency => FrameFrequency * 100000;
 
 	void SetPushLabel(string Text)
 	{
@@ -27,6 +28,12 @@ public class DecodeDemo : MonoBehaviour
 	{
 		var Label = Document.rootVisualElement.Q<Label>(DecodePopLabelName);
 		Label.text = Text;
+	}
+	
+	void SetImage(Texture texture)
+	{
+		var Element = Document.rootVisualElement.Q<VisualElement>(DecodeImageName);
+		Element.style.backgroundImage = new StyleBackground(texture as Texture2D);
 	}
 
 	void Start()
@@ -80,7 +87,7 @@ public class DecodeDemo : MonoBehaviour
 			InputFrame.Bytes = H264Data;
 			InputFrame.FrameNumber = FrameCounter;
 			Decoder.PushFrameData(InputFrame);
-			SetPushLabel($"Pushed test data frame {FrameCounter}");
+			SetPushLabel($"Pushed test data frame {FrameCounter} x{H264Data.Length}");
 		}
 		FrameCounter++;
 	}
@@ -97,6 +104,14 @@ public class DecodeDemo : MonoBehaviour
 		{
 			var Meta = MetaMaybe.Value;
 			SetPopLabel($"Got New frame {Meta.FrameNumber}");
+			SetImage( DecodedPlanes[0] );
 		}
+		
+		if ( Decoder.HadEndOfStream )
+		{
+			SetPopLabel($"Decoder popped EOF");
+			Decoder = new PopH264.Decoder(DecoderParams,true);
+		}
+		
 	}
 }

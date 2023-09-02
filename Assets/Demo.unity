@@ -262,7 +262,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Document: {fileID: 26433717}
-  UiLabelName: DecodeLabel
+  DecodePushLabelName: DecodePushLabel
+  DecodePopLabelName: DecodePopLabel
   DecoderParams:
     Decoder: 
     VerboseDebug: 0
@@ -272,7 +273,7 @@ MonoBehaviour:
     LowPowerMode: 0
     DropBadFrames: 0
     DecodeSei: 0
-  TestDataName: RainbowGradient.h264
+  TestDataName: Cat.jpg
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
