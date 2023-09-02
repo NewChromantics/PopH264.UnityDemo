@@ -1,12 +1,13 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <ui:VisualElement style="flex-grow: 1; background-color: rgb(202, 143, 73); opacity: 0.8;">
-        <ui:Label tabindex="-1" text="PopH264 Version..." display-tooltip-when-elided="true" name="VersionLabel" />
-        <ui:VisualElement name="EncodeImage" style="flex-basis: 50%;">
-            <ui:Label text="EncodeLabel" display-tooltip-when-elided="true" name="EncodeLabel" />
+        <ui:Label tabindex="-1" text="PopH264 Version..." display-tooltip-when-elided="true" name="VersionLabel" style="flex-wrap: wrap; white-space: normal; margin-left: 10px; margin-right: 10px; margin-top: 10px; margin-bottom: 10px;" />
+        <ui:VisualElement name="EncodeImage" style="flex-basis: 50%; -unity-background-scale-mode: scale-to-fit;">
+            <ui:Label text="EncodePushLabel" display-tooltip-when-elided="true" name="EncodePushLabel" style="flex-wrap: wrap; white-space: normal; margin-left: 10px; margin-right: 10px; margin-top: 10px; margin-bottom: 10px; background-color: rgba(70, 178, 221, 255);" />
+            <ui:Label text="EncodePopLabel" display-tooltip-when-elided="true" name="EncodePopLabel" style="flex-wrap: wrap; white-space: normal; margin-left: 10px; margin-right: 10px; margin-top: 10px; margin-bottom: 10px; background-color: rgba(255, 114, 236, 255);" />
         </ui:VisualElement>
-        <ui:VisualElement name="DecodeImage" style="flex-basis: 50%;">
-            <ui:Label text="DecodePushLabel" display-tooltip-when-elided="true" name="DecodePushLabel" />
-            <ui:Label text="DecodePopLabel" display-tooltip-when-elided="true" name="DecodePopLabel" />
+        <ui:VisualElement name="DecodeImage" style="flex-basis: 50%; -unity-background-scale-mode: scale-to-fit; background-image: none;">
+            <ui:Label text="DecodePushLabel" display-tooltip-when-elided="true" name="DecodePushLabel" style="flex-wrap: wrap; background-color: rgb(238, 66, 66); white-space: normal; margin-left: 10px; margin-right: 10px; margin-top: 10px; margin-bottom: 10px;" />
+            <ui:Label text="DecodePopLabel" display-tooltip-when-elided="true" name="DecodePopLabel" style="flex-wrap: nowrap; background-color: rgb(143, 185, 50); -unity-background-scale-mode: stretch-to-fill; white-space: normal; margin-left: 10px; margin-right: 10px; margin-top: 10px; margin-bottom: 10px;" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

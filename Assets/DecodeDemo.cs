@@ -18,6 +18,9 @@ public class DecodeDemo : MonoBehaviour
 	int FrameCounter = 0;
 	int FrameFrequency = 100;
 	int KeyFrameFrequency => FrameFrequency * 100000;
+	
+	List<byte[]>		DecodeH264Queue;
+	
 
 	void SetPushLabel(string Text)
 	{
@@ -76,18 +79,35 @@ public class DecodeDemo : MonoBehaviour
 		//	send EOF every so often
 		if ( FrameCounter % KeyFrameFrequency == 0 )
 		{
-			Decoder.PushEndOfStream();
-			SetPushLabel($"Pushed EOF on frame {FrameCounter}");
+			//Decoder.PushEndOfStream();
+			//SetPushLabel($"Pushed EOF on frame {FrameCounter}");
 		}
-		else if ( FrameCounter % FrameFrequency == 0 )
+		else
 		{
-			//	grab test data
-			var H264Data = PopH264.GetH264TestData(TestDataName);
-			var InputFrame = new PopH264.FrameInput();
-			InputFrame.Bytes = H264Data;
-			InputFrame.FrameNumber = FrameCounter;
-			Decoder.PushFrameData(InputFrame);
-			SetPushLabel($"Pushed test data frame {FrameCounter} x{H264Data.Length}");
+			//	push data asap from queue
+			if ( !String.IsNullOrEmpty(TestDataName) )
+			{
+				if ( FrameCounter % FrameFrequency == 0 )
+				{
+					//	grab test data
+					var H264Data = PopH264.GetH264TestData(TestDataName);
+					var InputFrame = new PopH264.FrameInput();
+					InputFrame.Bytes = H264Data;
+					InputFrame.FrameNumber = FrameCounter;
+					Decoder.PushFrameData(InputFrame);
+					SetPushLabel($"Pushed test data frame {FrameCounter} x{H264Data.Length}"); 
+				}
+			}
+			else if ( DecodeH264Queue != null && DecodeH264Queue.Count > 0 )
+			{
+				var PoppedPacket = DecodeH264Queue[0];
+				DecodeH264Queue.RemoveAt(0);
+				var InputFrame = new PopH264.FrameInput();
+				InputFrame.Bytes = PoppedPacket;
+				InputFrame.FrameNumber = FrameCounter;
+				Decoder.PushFrameData(InputFrame);
+				SetPushLabel($"Pushed input data frame {FrameCounter} x{PoppedPacket.Length}"); 
+			}
 		}
 		FrameCounter++;
 	}
@@ -103,7 +123,8 @@ public class DecodeDemo : MonoBehaviour
 		if ( MetaMaybe.HasValue )
 		{
 			var Meta = MetaMaybe.Value;
-			SetPopLabel($"Got New frame {Meta.FrameNumber}");
+			var PlaneMeta = $"{DecodedPlanes[0].width} x {DecodedPlanes[0].height}";
+			SetPopLabel($"Got New frame {Meta.FrameNumber} {PlaneMeta}");
 			SetImage( DecodedPlanes[0] );
 		}
 		
@@ -112,6 +133,12 @@ public class DecodeDemo : MonoBehaviour
 			SetPopLabel($"Decoder popped EOF");
 			Decoder = new PopH264.Decoder(DecoderParams,true);
 		}
+	}
 		
+	public void PushH264(byte[] H264Data)
+	{
+		if ( DecodeH264Queue == null )
+			DecodeH264Queue = new List<byte[]>();
+		DecodeH264Queue.Add(H264Data);
 	}
 }
