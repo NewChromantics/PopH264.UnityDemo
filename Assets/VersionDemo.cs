@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class PopH264_UpdateUiWithVersion : MonoBehaviour
+public class VersionDemo : MonoBehaviour
 {
 	public UIDocument	Document;
 	public string		UiLabelName = "VersionLabel";
@@ -17,9 +17,6 @@ public class PopH264_UpdateUiWithVersion : MonoBehaviour
 
 	void Start()
 	{
-		//	get target label
-		
-		
 		try
 		{
 			var Version = PopH264.GetVersion();
@@ -30,6 +27,5 @@ public class PopH264_UpdateUiWithVersion : MonoBehaviour
 		{
 			SetLabel($"Error getting version: {e.Message}");
 		}
-
 	}
 }
