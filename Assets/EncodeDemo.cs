@@ -86,6 +86,9 @@ public class EncodeDemo : MonoBehaviour
 	
 	void PushFrame()
 	{
+		if ( Encoder == null )
+			return;
+
 		//	send EOF every so often
 		if ( FrameCounter % KeyFrameFrequency == 0 )
 		{
@@ -105,6 +108,9 @@ public class EncodeDemo : MonoBehaviour
 	
 	void PopFrame()
 	{
+		if ( Encoder == null )
+			return;
+
 		//	look for a new frame
 		var FrameMaybe = Encoder.PopFrame();
 		if ( FrameMaybe.HasValue )

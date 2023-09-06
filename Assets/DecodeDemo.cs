@@ -48,7 +48,7 @@ public class DecodeDemo : MonoBehaviour
 		}
 		catch(Exception e)
 		{
-			SetPushLabel($"Error getting version: {e.Message}");
+			SetPushLabel($"Error allocating decoder: {e.Message}");
 		}
 	}
 
@@ -76,6 +76,12 @@ public class DecodeDemo : MonoBehaviour
 	
 	void PushFrame()
 	{
+		if (Decoder == null)
+		{
+			//SetPushLabel("Null decoder");
+			return;
+		}
+
 		//	send EOF every so often
 		if ( FrameCounter % KeyFrameFrequency == 0 )
 		{
@@ -118,6 +124,12 @@ public class DecodeDemo : MonoBehaviour
 	
 	void PopFrame()
 	{
+		if ( Decoder == null )
+		{
+			//SetPopLabel("Null decoder");
+			return;
+		}
+
 		//	look for a new frame
 		var MetaMaybe = Decoder.GetNextFrameAndMeta( ref DecodedPlanes, ref DecodedPixelFormats );
 		if ( MetaMaybe.HasValue )
