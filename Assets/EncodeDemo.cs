@@ -21,7 +21,7 @@ public class EncodeDemo : MonoBehaviour
 
 	int FrameCounter = 0;
 	int FrameFrequency = 100;
-	int KeyFrameFrequency => FrameFrequency * 100000;
+	int KeyFrameFrequency => FrameFrequency * 10;
 
 	void SetPushLabel(string Text)
 	{
@@ -75,11 +75,11 @@ public class EncodeDemo : MonoBehaviour
 	}
 
 
-	void PushFrame(Texture2D Image)
+	void PushFrame(Texture2D Image,bool Keyframe=false)
 	{
 		var Rgba = Image.GetRawTextureData();
 		
-		Encoder.PushFrame( Rgba, Image.width, Image.height, Image.format );
+		Encoder.PushFrame( Rgba, Image.width, Image.height, Image.format, Keyframe);
 		SetPushLabel($"Pushed test data frame {FrameCounter}");
 		SetImage(Image);
 	}
@@ -89,11 +89,17 @@ public class EncodeDemo : MonoBehaviour
 		if ( Encoder == null )
 			return;
 
-		//	send EOF every so often
-		if ( FrameCounter % KeyFrameFrequency == 0 )
+		//	gr: for testing, we should EOF once in a while
+		bool SendEof = false;
+		if ( SendEof )
 		{
 			Encoder.PushEndOfStream();
 			SetPushLabel($"Pushed EOF on frame {FrameCounter}");
+		}
+		//	send keyframe every so often
+		else if ( FrameCounter % KeyFrameFrequency == KeyFrameFrequency-1)
+		{
+			PushFrame(InputTexture,true);
 		}
 		else if ( FrameCounter % FrameFrequency == 0 )
 		{
@@ -116,7 +122,7 @@ public class EncodeDemo : MonoBehaviour
 		if ( FrameMaybe.HasValue )
 		{
 			var Frame = FrameMaybe.Value;
-			SetPopLabel($"Got New frame {Frame.H264Data} bytes");
+			SetPopLabel($"Got New frame {Frame.H264Data} bytes, encoder={Frame.EncoderMeta.EncoderName} encodeduration={Frame.EncoderMeta.EncodeDurationMs}ms");
 			
 			if ( PushToDecoder != null )
 			{
