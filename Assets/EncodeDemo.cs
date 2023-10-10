@@ -90,6 +90,22 @@ public class EncodeDemo : MonoBehaviour
 	}
 	
 
+	public void PushFrame(byte[] Pixels,int Width,int Height,PopH264.PixelFormat Format,int FrameNumber,bool Keyframe=false)
+	{
+		try
+		{
+			Encoder.PushFrame( Pixels, Width, Height, Format, Keyframe);
+			if ( Keyframe )
+				SetPushLabel($"Pushed test data frame {FrameNumber} (Keyframe={Keyframe})");
+			//SetImage(Image);
+		}
+		catch(Exception e)
+		{
+			SetPushLabel($"Pushed frame error {e.Message}");
+		}
+		
+	}
+	
 	public void PushFrame(Texture2D Image,int FrameNumber,bool Keyframe=false)
 	{
 		try
