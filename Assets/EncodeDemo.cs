@@ -13,29 +13,15 @@ public class EncodeDemo : MonoBehaviour
 	public string		PopLabelName = "EncodePopLabel";
 	public string		ImageName = "EncodeImage";
 
-	public Texture2D	InputTexture;
 	PopH264.Encoder		Encoder;
 	public PopH264.EncoderParams	EncoderParams;
 	
 	public DecodeDemo	PushToDecoder;
-
-	int					UpdateCounter = 0;
 	
-	[Header("Encode a frame every N updates")]
-	[Range(1,60)]
-	public int			FrameFrequency = 60;
+	List<Texture2D> DecodedPlanes;
+	List<PopH264.PixelFormat> DecodedPixelFormats;
 	
-	[Header("Make a keyframe every N frames")]
-	[Range(0,100)]
-	public int			KeyframeFrequency = 10;
 
-	[Header("Send EOF every N frames (will stop encoding)")]
-	[Range(0,1000)]
-	public int			EofFrequency = 1000;
-
-	int					FramePerUpdateFrequency => Math.Max(1,FrameFrequency);
-	int					KeyFramePerUpdateFrequency => Math.Max(1,FramePerUpdateFrequency * KeyframeFrequency);
-	int					EofPerUpdateFrequency => Math.Max(1,FramePerUpdateFrequency * EofFrequency);
 
 	void SetPushLabel(string Text)
 	{
@@ -48,7 +34,7 @@ public class EncodeDemo : MonoBehaviour
 		Label.text = Text;
 	}
 	
-	void SetImage(Texture texture)
+	public void SetImage(Texture texture)
 	{
 		var Element = Document.rootVisualElement.Q<VisualElement>(ImageName);
 		Element.style.backgroundImage = new StyleBackground(texture as Texture2D);
@@ -71,15 +57,6 @@ public class EncodeDemo : MonoBehaviour
 	{	
 		try
 		{
-			PushFrame();
-		}
-		catch(Exception e)
-		{
-			SetPushLabel($"{e.Message}");
-		}
-
-		try
-		{
 			PopFrame();
 		}
 		catch(Exception e)
@@ -89,40 +66,48 @@ public class EncodeDemo : MonoBehaviour
 	}
 
 
-	void PushFrame(Texture2D Image,bool Keyframe=false)
+	public void PushEndOfStream()
 	{
-		var Rgba = Image.GetRawTextureData();
-		
-		Encoder.PushFrame( Rgba, Image.width, Image.height, Image.format, Keyframe);
-		SetPushLabel($"Pushed test data frame {UpdateCounter}");
-		SetImage(Image);
+		try
+		{
+			SetPushLabel($"Pushed EOF");
+		}
+		catch(Exception e)
+		{
+			SetPushLabel($"PushEof {e.Message}");
+		}
+	}
+	public void PushFrame(int FrameNumber)
+	{
+		try
+		{
+			SetPushLabel($"Pushed EOF");
+		}
+		catch(Exception e)
+		{
+			SetPushLabel($"PushEof {e.Message}");
+		}
 	}
 	
-	void PushFrame()
-	{
-		if ( Encoder == null )
-			return;
 
-		if ( UpdateCounter % EofPerUpdateFrequency == EofPerUpdateFrequency-1)
+	public void PushFrame(Texture2D Image,int FrameNumber,bool Keyframe=false)
+	{
+		try
 		{
-			Encoder.PushEndOfStream();
-			SetPushLabel($"Pushed EOF on frame {UpdateCounter}");
+			var Rgba = Image.GetRawTextureData();
+			
+			Encoder.PushFrame( Rgba, Image.width, Image.height, Image.format, Keyframe);
+			if ( Keyframe )
+				SetPushLabel($"Pushed test data frame {FrameNumber} (Keyframe={Keyframe})");
+			SetImage(Image);
 		}
-		else if ( UpdateCounter % KeyFramePerUpdateFrequency == KeyFramePerUpdateFrequency-1)
+		catch(Exception e)
 		{
-			PushFrame(InputTexture,true);
-			SetPushLabel($"Pushed Keyframe on frame {UpdateCounter}");
+			SetPushLabel($"Pushed frame error {e.Message}");
 		}
-		else if ( UpdateCounter % FrameFrequency == 0 )
-		{
-			PushFrame(InputTexture);
-		}
-		UpdateCounter++;
+		
 	}
-	
-	List<Texture2D> DecodedPlanes;
-	List<PopH264.PixelFormat> DecodedPixelFormats;
-	
+
 	
 	void PopFrame()
 	{
