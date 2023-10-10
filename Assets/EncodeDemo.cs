@@ -19,9 +19,23 @@ public class EncodeDemo : MonoBehaviour
 	
 	public DecodeDemo	PushToDecoder;
 
-	int FrameCounter = 0;
-	int FrameFrequency = 100;
-	int KeyFrameFrequency => FrameFrequency * 10;
+	int					UpdateCounter = 0;
+	
+	[Header("Encode a frame every N updates")]
+	[Range(1,60)]
+	public int			FrameFrequency = 60;
+	
+	[Header("Make a keyframe every N frames")]
+	[Range(0,100)]
+	public int			KeyframeFrequency = 10;
+
+	[Header("Send EOF every N frames (will stop encoding)")]
+	[Range(0,1000)]
+	public int			EofFrequency = 1000;
+
+	int					FramePerUpdateFrequency => Math.Max(1,FrameFrequency);
+	int					KeyFramePerUpdateFrequency => Math.Max(1,FramePerUpdateFrequency * KeyframeFrequency);
+	int					EofPerUpdateFrequency => Math.Max(1,FramePerUpdateFrequency * EofFrequency);
 
 	void SetPushLabel(string Text)
 	{
@@ -80,7 +94,7 @@ public class EncodeDemo : MonoBehaviour
 		var Rgba = Image.GetRawTextureData();
 		
 		Encoder.PushFrame( Rgba, Image.width, Image.height, Image.format, Keyframe);
-		SetPushLabel($"Pushed test data frame {FrameCounter}");
+		SetPushLabel($"Pushed test data frame {UpdateCounter}");
 		SetImage(Image);
 	}
 	
@@ -89,23 +103,21 @@ public class EncodeDemo : MonoBehaviour
 		if ( Encoder == null )
 			return;
 
-		//	gr: for testing, we should EOF once in a while
-		bool SendEof = false;
-		if ( SendEof )
+		if ( UpdateCounter % EofPerUpdateFrequency == EofPerUpdateFrequency-1)
 		{
 			Encoder.PushEndOfStream();
-			SetPushLabel($"Pushed EOF on frame {FrameCounter}");
+			SetPushLabel($"Pushed EOF on frame {UpdateCounter}");
 		}
-		//	send keyframe every so often
-		else if ( FrameCounter % KeyFrameFrequency == KeyFrameFrequency-1)
+		else if ( UpdateCounter % KeyFramePerUpdateFrequency == KeyFramePerUpdateFrequency-1)
 		{
 			PushFrame(InputTexture,true);
+			SetPushLabel($"Pushed Keyframe on frame {UpdateCounter}");
 		}
-		else if ( FrameCounter % FrameFrequency == 0 )
+		else if ( UpdateCounter % FrameFrequency == 0 )
 		{
 			PushFrame(InputTexture);
 		}
-		FrameCounter++;
+		UpdateCounter++;
 	}
 	
 	List<Texture2D> DecodedPlanes;
@@ -119,14 +131,19 @@ public class EncodeDemo : MonoBehaviour
 
 		//	look for a new frame
 		var FrameMaybe = Encoder.PopFrame();
-		if ( FrameMaybe.HasValue )
+		if ( FrameMaybe is PopH264.H264Frame Frame )
 		{
-			var Frame = FrameMaybe.Value;
-			SetPopLabel($"Got New frame {Frame.H264Data} bytes, encoder={Frame.EncoderMeta.EncoderName} encodeduration={Frame.EncoderMeta.EncodeDurationMs}ms");
+			if ( Frame.EndOfStream )
+				SetPopLabel($"Got EndOfStream");
+			else
+				SetPopLabel($"Got New frame {Frame.H264Data?.Length} bytes, encoder={Frame.EncoderMeta.EncoderName} encodeduration={Frame.EncoderMeta.EncodeDurationMs}ms");
 			
 			if ( PushToDecoder != null )
 			{
-				PushToDecoder.PushH264( Frame.H264Data );
+				if ( Frame.EndOfStream )
+					PushToDecoder.PushEndOfStream();
+				else
+					PushToDecoder.PushH264( Frame.H264Data );
 			}
 		}
 	}

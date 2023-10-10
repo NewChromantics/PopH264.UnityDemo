@@ -14,6 +14,7 @@ public class DecodeDemo : MonoBehaviour
 
 	PopH264.Decoder		Decoder;
 	public PopH264.DecoderParams	DecoderParams;
+	[Header("If set load data from PopH264 and decode. otherwise waits for input")]
 	public string		TestDataName = "RainbowGradient.h264";
 	int FrameCounter = 0;
 	int FrameFrequency = 100;
@@ -108,11 +109,19 @@ public class DecodeDemo : MonoBehaviour
 			{
 				var PoppedPacket = DecodeH264Queue[0];
 				DecodeH264Queue.RemoveAt(0);
-				var InputFrame = new PopH264.FrameInput();
-				InputFrame.Bytes = PoppedPacket;
-				InputFrame.FrameNumber = FrameCounter;
-				Decoder.PushFrameData(InputFrame);
-				SetPushLabel($"Pushed input data frame {FrameCounter} x{PoppedPacket.Length}"); 
+				if ( PoppedPacket.Length == 0 )
+				{
+					Decoder.PushEndOfStream();
+					SetPushLabel($"Pushed EndOfStream");
+				}
+				else
+				{
+					var InputFrame = new PopH264.FrameInput();
+					InputFrame.Bytes = PoppedPacket;
+					InputFrame.FrameNumber = FrameCounter;
+					Decoder.PushFrameData(InputFrame);
+					SetPushLabel($"Pushed input data frame {FrameCounter} x{PoppedPacket.Length}");
+				} 
 			}
 		}
 		FrameCounter++;
@@ -146,7 +155,12 @@ public class DecodeDemo : MonoBehaviour
 			Decoder = new PopH264.Decoder(DecoderParams,true);
 		}
 	}
-		
+	
+	public void PushEndOfStream()
+	{
+		PushH264( Array.Empty<byte>() );
+	}
+
 	public void PushH264(byte[] H264Data)
 	{
 		if ( DecodeH264Queue == null )
